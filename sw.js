@@ -1,6 +1,6 @@
 /* Service worker: la app funciona sin conexión después de la primera visita.
    Al cambiar cualquier archivo, subir el número de VERSION para que los celulares se actualicen. */
-const VERSION = 'startrek-v2';
+const VERSION = 'startrek-v5';
 const SHELL = ['./', 'index.html', 'style.css', 'engine.js', 'ui.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 

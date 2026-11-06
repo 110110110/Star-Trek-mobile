@@ -213,3 +213,35 @@ dialog .right{text-align:right;margin:10px 0 0}
 body[data-crt="off"] .crt-fx{display:none}
 body[data-crt="soft"] .crt-fx .hum,body[data-crt="soft"] .crt-fx canvas{display:none}
 @media (prefers-reduced-motion:reduce){.crt-fx .hum{display:none}.lamp.ROJO i,.log .cur{animation:none}}
+
+/* ---------- tutorial, apuntar, puntaje ---------- */
+.tut{display:flex;flex-direction:column;gap:6px;border:1px solid var(--amber);border-radius:6px;background:rgba(255,192,74,.07);padding:7px 9px;font-size:12px;line-height:1.45;color:#e8efe9}
+.tut[hidden]{display:none}
+.tut i{font-style:normal;color:var(--amber);letter-spacing:.1em;font-size:10px;text-transform:uppercase;margin-right:4px}
+.tut b{color:#fff}
+.tut .tb{display:flex;gap:6px;justify-content:flex-end}.tut .tb .btn{min-height:34px;padding:4px 12px}
+.app[data-hl~="top"] #top,.app[data-hl~="grid"] #qgrid,.app[data-hl~="ctx"] #ctx,.app[data-hl~="main"] #main,.app[data-hl~="gal"] .tab[data-t="gal"]{outline:2px solid var(--amber);outline-offset:2px;animation:hlp 1s infinite alternate}
+@keyframes hlp{from{outline-color:rgba(255,192,74,.25)}to{outline-color:var(--amber)}}
+@media (prefers-reduced-motion:reduce){.app[data-hl] *{animation:none!important}}
+.aimtxt{flex:1 1 100%;font-size:12px;line-height:1.45;color:#cfe3d4}.aimtxt b{color:#fff}.aimtxt .warn{color:var(--amber)}.aimtxt .bad{color:var(--red)}
+.stats{display:grid;grid-template-columns:1fr auto;gap:5px 14px;width:100%;max-width:420px;font-size:12px;text-align:left;color:#a8c4b0}
+.stats b{color:#fff;text-align:right}
+.score{display:flex;flex-direction:column;align-items:center;gap:2px}
+.score>b{font:400 clamp(38px,12vw,64px)/1 var(--f-disp);color:#fff;text-shadow:0 0 14px var(--phos)}
+.score span{font-size:12px;color:#a8c4b0}.score em{font-style:normal;color:var(--phos)}
+.score strong{color:var(--amber);letter-spacing:.14em;font-size:13px;margin-top:4px;animation:pulse .8s infinite alternate}
+.hist{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:12px}
+.hist>div{display:grid;grid-template-columns:42px 1fr auto auto;gap:8px;border-left:3px solid var(--faint);padding:3px 8px;background:rgba(141,255,176,.04)}
+.hist>div.w{border-color:var(--phos)}.hist>div.l{border-color:var(--red)}.hist b{color:#fff}
+
+/* ---------- reglas avanzadas ---------- */
+.cell.h svg{color:#b28cff;filter:drop-shadow(0 0 5px #8c5cff);animation:spin 6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.cell.h svg{animation:none}}
+.gc{position:relative}
+.gc .bhm{position:absolute;top:1px;right:3px;font-size:9px;line-height:1;color:var(--amber);text-decoration:none}
+
+/* sacudón al recibir un impacto */
+@keyframes shake{0%,100%{transform:none}15%{transform:translate(-5px,2px)}30%{transform:translate(4px,-3px)}45%{transform:translate(-3px,-2px)}60%{transform:translate(3px,2px)}80%{transform:translate(-1px,1px)}}
+.app.shake{animation:shake .42s ease-out}
+@media (prefers-reduced-motion:reduce){.app.shake{animation:none}}

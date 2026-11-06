@@ -33,6 +33,7 @@ function Trek(opts){
   this.out = [];                       // mensajes {t, k}
   this.say = (t, k) => this.out.push({ t, k: k || 'info' });
   this.diff = opts.diff == null ? 1 : opts.diff;
+  this.adv = !!opts.adv;                // reglas avanzadas: Klingon que persiguen, agujeros negros y sondas
   const C = [[0,0,0]]; for(let i=1;i<=10;i++) C.push([0,0,0]);
   C[3][1]=-1; C[2][1]=-1; C[4][1]=-1; C[4][2]=-1; C[5][2]=-1; C[6][2]=-1;
   C[1][2]=1; C[2][2]=1; C[6][1]=1; C[7][1]=1; C[8][1]=1; C[8][2]=1; C[9][2]=1;
@@ -48,7 +49,10 @@ Trek.prototype.reset = function(){
   this.E0 = 3000; this.E = 3000; this.P0 = 10; this.P = 10; this.S = 0; this.S9 = 200 * [0.8,1,1.15][this.diff];
   this.D0 = 0; this.B9 = 0; this.K9 = 0; this.over = null; this.D4 = 0; this.G5 = 0; this.cond = 'VERDE';
   this.Q1 = FNR(); this.Q2 = FNR(); this.S1 = FNR(); this.S2 = FNR();
+  const BH = [], ZB = []; for(let i=0;i<=9;i++){ BH[i] = new Array(10).fill(0); ZB[i] = new Array(10).fill(0); }
+  this.BH = BH; this.ZB = ZB; this.PR0 = this.adv ? 3 : 0; this.PR = this.PR0;
   for(let i=1;i<=8;i++) for(let j=1;j<=8;j++){
+    if(this.adv && Math.random() < .06) BH[i][j] = 1;
     let k3 = 0; const r1 = Math.random();
     if(r1 > .98){ k3 = 3; this.K9 += 3; } else if(r1 > .95){ k3 = 2; this.K9 += 2; } else if(r1 > .80){ k3 = 1; this.K9 += 1; }
     let b3 = 0; if(Math.random() > .96){ b3 = 1; this.B9++; }
@@ -61,6 +65,7 @@ Trek.prototype.reset = function(){
   }
   this.T9 += [6,0,-3][this.diff]; if(this.T9 <= this.K9) this.T9 = this.K9 + 1;
   this.K7 = this.K9; this.out = [];
+  if(this.adv) this.say('REGLAS AVANZADAS: los Klingon te persiguen, hay agujeros negros sin cartografiar y llevás sondas para explorar a distancia.', 'warn');
   this.say(`ÓRDENES: destruir los ${this.K9} navíos Klingon que invadieron la galaxia antes de la fecha estelar ${this.T0 + this.T9} (${this.T9} días). Hay ${this.B9} base${this.B9 === 1 ? '' : 's'} estelar${this.B9 === 1 ? '' : 'es'} para reabastecerse.`, 'crew');
   this.enterQuadrant(true);
 };
@@ -80,6 +85,7 @@ Trek.prototype.enterQuadrant = function(first){
   this.B4 = this.B5 = 0;
   if(this.B3 >= 1){ const [r,c] = this.empty(); this.Q[r][c] = '>!<'; this.B4 = r; this.B5 = c; }
   for(let i=1;i<=this.S3;i++){ const [r,c] = this.empty(); this.Q[r][c] = ' * '; }
+  if(this.adv && this.BH[this.Q1][this.Q2]){ const [r,c] = this.empty(); this.Q[r][c] = '(@)'; this.ZB[this.Q1][this.Q2] = 1; this.say('¡Detectamos un AGUJERO NEGRO en este cuadrante! No te acerques.', 'alert'); }
   this.refresh();
 };
 /* atraque y condición (subrutina 6430) */
@@ -90,7 +96,7 @@ Trek.prototype.refresh = function(){
     if(this.Q[i][j] === '>!<'){ docked = true; break; }
   }
   const was = this.D0;
-  if(docked){ this.D0 = 1; this.cond = 'ATRACADO'; this.E = this.E0; this.P = this.P0; this.S = 0; if(!was) this.say('Atracado. Escudos bajados, energía y torpedos repuestos.', 'good'); }
+  if(docked){ this.D0 = 1; this.cond = 'ATRACADO'; this.E = this.E0; this.P = this.P0; this.PR = this.PR0; this.S = 0; if(!was) this.say('Atracado. Escudos bajados, energía y torpedos repuestos.', 'good'); }
   else { this.D0 = 0; this.cond = this.K3 > 0 ? 'ROJO' : (this.E < this.E0*.1 ? 'AMARILLO' : 'VERDE'); }
 };
 Trek.prototype.stranded = function(){
@@ -131,6 +137,48 @@ Trek.prototype.klingonsFire = function(){
     this.say(`Control de daños informa: ${DEV[r1-1]} dañado por el impacto.`, 'warn');
   }
 };
+/* los Klingon disparan y, con reglas avanzadas, se acercan a la Enterprise */
+Trek.prototype.foes = function(steps){
+  this.klingonsFire();
+  if(this.adv && !this.over && this.K3 > 0) this.moveKlingons(steps);
+};
+Trek.prototype.moveKlingons = function(steps){
+  let moved = 0;
+  for(let i=1;i<=3;i++){
+    const k = this.K[i]; if(k[3] <= 0) continue;
+    for(let s=0;s<steps;s++){
+      if(Math.max(Math.abs(k[1]-this.S1), Math.abs(k[2]-this.S2)) <= 1) break;       // ya está pegado
+      if(Math.random() < .2) continue;                                                // a veces duda
+      const dr = Math.sign(this.S1 - k[1]), dc = Math.sign(this.S2 - k[2]);
+      const opts = [[dr,dc],[dr,0],[0,dc]].filter(o => o[0] || o[1]);
+      const ok = opts.find(o => { const r = k[1]+o[0], c = k[2]+o[1]; return r>=1 && r<=8 && c>=1 && c<=8 && this.Q[r][c] === '   '; });
+      if(!ok) break;
+      this.Q[k[1]][k[2]] = '   '; k[1] += ok[0]; k[2] += ok[1]; this.Q[k[1]][k[2]] = '+K+'; moved++;
+    }
+  }
+  if(moved) this.say(moved === 1 ? 'Los sensores detectan que un Klingon se acerca.' : 'Los sensores detectan que los Klingon se acercan.', 'warn');
+};
+Trek.prototype.fallInHole = function(n){
+  this.ZB[this.Q1][this.Q2] = 1;
+  this.say('¡AGUJERO NEGRO! La nave cruza el horizonte de sucesos y es arrastrada a otro rincón de la galaxia.', 'alert');
+  this.T += 1 + int(Math.random()*3);
+  const r1 = FNR(); this.D[r1] -= 1 + Math.random()*2; this.say(`Control de daños: ${DEV[r1-1]} dañado por las fuerzas de marea.`, 'warn');
+  this.Q1 = FNR(); this.Q2 = FNR(); this.S1 = FNR(); this.S2 = FNR(); this.maneuverEnergy(n);
+  if(this.T > this.T0 + this.T9){ this.finish(false, 'tiempo'); return; }
+  this.enterQuadrant(false); this.stranded();
+};
+Trek.prototype.probe = function(c1, tgt){
+  if(this.over || !this.adv) return false;
+  if(this.PR <= 0){ this.say('No quedan sondas. Repone en una base estelar.', 'warn'); return false; }
+  if(c1 === 9) c1 = 1;
+  if(!(c1 >= 1 && c1 < 9)){ this.say("Alférez Chekov informa: «¡Rumbo incorrecto, señor!»", 'crew'); return false; }
+  const [x1,x2] = this.vec(c1); let x = this.Q1, y = this.Q2, n = 0, bh = 0; this.PR--;
+  const seen = (r,c) => { if(this.Z[r][c] === 0) n++; this.Z[r][c] = this.G[r][c]; if(this.BH[r][c]){ this.ZB[r][c] = 1; bh++; } };
+  for(;;){ x += x1; y += x2; const r = int(x+.5), c = int(y+.5); if(r<1||r>8||c<1||c>8) break; seen(r,c); }
+  if(tgt) seen(tgt[0], tgt[1]);
+  this.say(`Sonda lanzada con rumbo ${fmt(Math.round(c1*10)/10)}: descubrió ${n} cuadrante${n === 1 ? '' : 's'} nuevo${n === 1 ? '' : 's'} del mapa de la galaxia${bh ? ` (${bh} con agujero negro)` : ''}.`, 'good');
+  return true;
+};
 Trek.prototype.maneuverEnergy = function(n){
   this.E = this.E - n - 10;
   if(this.E < 0){ this.say('El control de escudos aporta energía para completar la maniobra.', 'warn'); this.S += this.E; this.E = 0; if(this.S <= 0) this.S = 0; }
@@ -149,11 +197,12 @@ Trek.prototype.warp = function(c1, w1){
     if(!(this.S < n - this.E || this.D[7] < 0)) this.say(`Sala de deflectores: hay ${int(this.S)} unidades desplegadas en los escudos. Bajá los escudos para liberar energía.`, 'warn');
     return false;
   }
-  for(let i=1;i<=this.K3;i++){
+  if(!this.adv) for(let i=1;i<=this.K3;i++){
     const k = this.K[i]; if(k[3] === 0) continue;
     this.Q[k[1]][k[2]] = '   '; const [r,c] = this.empty(); k[1] = r; k[2] = c; this.Q[r][c] = '+K+';
   }
   this.klingonsFire(); if(this.over) return true;
+  if(this.adv && this.K3 > 0) this.moveKlingons(2);
   let d1 = 0; const d6 = w1 >= 1 ? 1 : w1; const fixed = [];
   for(let i=1;i<=8;i++){
     if(this.D[i] >= 0) continue;
@@ -175,6 +224,7 @@ Trek.prototype.warp = function(c1, w1){
     this.S1 = fr(this.S1 + x1); this.S2 = fr(this.S2 + x2);
     if(this.S1 < 1 || this.S1 >= 9 || this.S2 < 1 || this.S2 >= 9){ out = true; break; }
     if(this.Q[ii(this.S1)][ii(this.S2)] === '   ') continue;
+    if(this.adv && this.Q[ii(this.S1)][ii(this.S2)] === '(@)'){ this.fallInHole(n); return true; }
     this.S1 = ii(this.S1 - x1); this.S2 = ii(this.S2 - x2);
     this.say(`Motores warp detenidos en el sector ${this.S1},${this.S2} por mala navegación: había un obstáculo.`, 'warn'); break;
   }
@@ -228,7 +278,7 @@ Trek.prototype.phasers = function(x){
       if(this.K9 <= 0){ this.finish(true); return true; }
     } else this.say(`Los sensores indican ${int(k[3])} unidades restantes.`, 'info');
   }
-  this.klingonsFire(); this.refresh(); this.stranded(); return true;
+  this.foes(1); this.refresh(); this.stranded(); return true;
 };
 Trek.prototype.torpedo = function(c1){
   if(this.over) return false;
@@ -240,21 +290,22 @@ Trek.prototype.torpedo = function(c1){
   this.track = [];
   for(;;){
     x += x1; y += x2; const x3 = int(x+.5), y3 = int(y+.5);
-    if(x3 < 1 || x3 > 8 || y3 < 1 || y3 > 8){ this.say('El torpedo erró el blanco.', 'info'); this.klingonsFire(); break; }
+    if(x3 < 1 || x3 > 8 || y3 < 1 || y3 > 8){ this.say('El torpedo erró el blanco.', 'info'); this.foes(1); break; }
     this.track.push([x3, y3]);
     const c = this.cell(x, y);
     if(c === '   ') continue;
     if(c === '+K+'){
       this.say('*** KLINGON DESTRUIDO ***', 'good'); this.K3--; this.K9--; if(this.K9 <= 0){ this.Q[x3][y3] = '   '; this.finish(true); return true; }
       let i; for(i=1;i<=3;i++) if(x3 === this.K[i][1] && y3 === this.K[i][2]) break; if(i > 3) i = 3; this.K[i][3] = 0;
-    } else if(c === ' * '){ this.say(`La estrella en ${x3},${y3} absorbió la energía del torpedo.`, 'info'); this.klingonsFire(); break; }
+    } else if(c === ' * '){ this.say(`La estrella en ${x3},${y3} absorbió la energía del torpedo.`, 'info'); this.foes(1); break; }
+    else if(c === '(@)'){ this.say(`El agujero negro de ${x3},${y3} se tragó el torpedo.`, 'info'); this.foes(1); break; }
     else if(c === '>!<'){
       this.say('*** BASE ESTELAR DESTRUIDA ***', 'alert'); this.B3--; this.B9--;
       if(this.B9 > 0 || this.K9 > this.T - this.T0 - this.T9){ this.say('El Comando de la Flota revisa tu foja para evaluar una corte marcial.', 'warn'); this.D0 = 0; }
       else { this.say('¡Se acabó, capitán! Queda relevado del mando y sentenciado a 99 fechas estelares de trabajos forzados en Cygnus 12.', 'alert'); this.finish(false, 'corte'); return true; }
     } else continue;
     this.Q[x3][y3] = '   '; this.G[this.Q1][this.Q2] = this.K3*100 + this.B3*10 + this.S3; this.Z[this.Q1][this.Q2] = this.G[this.Q1][this.Q2];
-    this.klingonsFire(); break;
+    this.foes(1); break;
   }
   this.refresh(); this.stranded(); return true;
 };
@@ -281,7 +332,7 @@ Trek.prototype.lrsAvailable = function(){ return this.D[3] >= 0; };
 Trek.prototype.lrs = function(){
   if(this.D[3] < 0){ this.say('Los sensores de largo alcance están inoperables.', 'warn'); return null; }
   const rows = [];
-  for(let i=this.Q1-1;i<=this.Q1+1;i++){ const r = []; for(let j=this.Q2-1;j<=this.Q2+1;j++){ if(i>0&&i<9&&j>0&&j<9){ r.push(this.G[i][j]); this.Z[i][j] = this.G[i][j]; } else r.push(-1); } rows.push(r); }
+  for(let i=this.Q1-1;i<=this.Q1+1;i++){ const r = []; for(let j=this.Q2-1;j<=this.Q2+1;j++){ if(i>0&&i<9&&j>0&&j<9){ r.push(this.G[i][j]); this.Z[i][j] = this.G[i][j]; if(this.BH[i][j]) this.ZB[i][j] = 1; } else r.push(-1); } rows.push(r); }
   return rows;
 };
 

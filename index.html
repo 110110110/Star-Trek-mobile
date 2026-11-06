@@ -42,6 +42,7 @@
   </section>
 
   <div class="dock pn" id="dock">
+    <div class="tut" id="tut" hidden></div>
     <div class="info" id="info"></div>
     <div class="ctx" id="ctx"></div>
     <div class="main" id="main"></div>
@@ -53,6 +54,11 @@
     <div class="sub" id="subShe"><label>ESCUDOS</label><input type="range" id="rShe" min="0" max="3000" step="10"><span class="val" id="vShe"></span>
       <span class="q"><button class="btn" data-f="0" type="button">0</button><button class="btn" data-f=".25" type="button">¼</button><button class="btn" data-f=".5" type="button">½</button></span>
       <button class="btn go" id="gShe" type="button">fijar</button></div>
+
+    <div class="sub" id="subAim"><div class="aimtxt" id="aimTxt"></div>
+      <div class="sl"><div><label>RUMBO</label><input type="range" id="rAim" min="1" max="9" step=".05" value="3"><span class="val" id="vAim"></span></div></div>
+      <span class="q"><button class="btn" data-a="-0.05" type="button">−</button><button class="btn" data-a="0.05" type="button">+</button><button class="btn" data-a="auto" type="button">auto</button><button class="btn" data-a="x" type="button">✕</button></span>
+      <button class="btn red" id="gAim" type="button">disparar torpedo</button></div>
 
     <div class="sub" id="subMan"><div class="rose" id="rose"></div>
       <div class="sl"><div><label>RUMBO</label><input type="range" id="rCrs" min="1" max="8.9" step=".1" value="3"><span class="val" id="vCrs"></span></div>
@@ -73,7 +79,7 @@
   <section class="view" data-v="gal" aria-label="Galaxia">
     <div class="galbox">
       <div class="gal" id="gal"></div>
-      <p class="legend"><span class="K">K</span> klingon · <span class="B">B</span> base · estrellas — tocá un cuadrante para viajar</p>
+      <p class="legend"><span class="K">K</span> klingon · <span class="B">B</span> base · estrellas<span id="bhLeg" hidden> · <span style="color:var(--amber)">●</span> agujero negro</span> — tocá un cuadrante para viajar</p>
     </div>
   </section>
 
@@ -99,7 +105,10 @@
   <h2>MENÚ</h2>
   <div class="menu">
     <button class="btn" id="bHelp" type="button">Cómo se juega</button>
+    <button class="btn" id="bTut" type="button">Ver el tutorial</button>
+    <button class="btn" id="bHist" type="button">Historial de misiones</button>
     <button class="btn" id="bSnd" type="button">Sonido: sí</button>
+    <button class="btn" id="bAmb" type="button">Ambiente de puente: sí</button>
     <button class="btn" id="bVib" type="button">Vibración: sí</button>
     <button class="btn" id="bCrt" type="button">Pantalla antigua: suave</button>
     <button class="btn" id="bFull" type="button" hidden>Pantalla completa</button>
@@ -111,7 +120,7 @@
 </div></dialog>
 
 <dialog id="dlg"><div class="dlgin">
-  <h2>CÓMO SE JUEGA</h2>
+  <h2 id="dlgT">CÓMO SE JUEGA</h2>
   <div id="dlgB"></div>
   <p class="right"><button class="mini" id="dlgX" type="button">cerrar</button></p>
 </div></dialog>

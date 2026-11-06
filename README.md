@@ -12,7 +12,12 @@ Command the starship, hunt down the invading Klingon fleet across an 8×8 galaxy
 - Tap to move, aim and fire, with torpedo courses calculated for you and a manual course/warp mode
 - Layouts for portrait phones, landscape phones and 7" tablets
 - Installable and fully playable offline
+- Optional **advanced rules** (toggle on the start screen): Klingons chase you instead of teleporting, black holes swallow careless ships, and 3 probes scout distant quadrants
+- Manual torpedo aiming: pick the course and see the trajectory on the map before firing
+- Mission summary with efficiency index, rank and a local history of your best runs
+- Short interactive tutorial on your first mission (replayable from the menu)
 - Auto-save: resume your mission where you left off
+- Synthesized sound effects (no audio files): phasers, photon torpedoes, Klingon disruptors, red alert siren, shields, warp, black hole, communicator chirps, plus an optional bridge-ambience hum
 - Optional retro CRT effect, sound and vibration
 - Three difficulty levels
 - Zero dependencies: plain HTML, CSS and JavaScript, no build step
