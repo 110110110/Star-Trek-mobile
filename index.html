@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Star Trek · Consola de mando</title>
+<meta name="description" content="Recreación de Super Star Trek con consola táctil para celular y tablet.">
+<meta name="theme-color" content="#020503">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Star Trek">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Major+Mono+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-crt="soft">
+
+<div class="app" id="app" data-tab="mapa">
+
+  <header class="top pn">
+    <div class="topin" id="top"></div>
+    <button class="icon-btn" id="bMenu" type="button" aria-label="Menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </header>
+
+  <div class="colL">
+  <section class="view" data-v="mapa" aria-label="Cuadrante">
+    <div class="mapcol">
+      <div class="qwrap">
+        <div></div><div class="cl" id="cl"></div>
+        <div class="rl" id="rl"></div><div class="qgrid" id="qgrid"></div>
+      </div>
+      <div class="strip" id="strip"></div>
+    </div>
+  </section>
+
+  <div class="dock pn" id="dock">
+    <div class="info" id="info"></div>
+    <div class="ctx" id="ctx"></div>
+    <div class="main" id="main"></div>
+
+    <div class="sub" id="subPha"><label>FÁSERS</label><input type="range" id="rPha" min="0" max="3000" step="10"><span class="val" id="vPha"></span>
+      <span class="q"><button class="btn" data-f=".25" type="button">¼</button><button class="btn" data-f=".5" type="button">½</button><button class="btn" data-f="1" type="button">máx</button></span>
+      <button class="btn go" id="gPha" type="button">disparar</button></div>
+
+    <div class="sub" id="subShe"><label>ESCUDOS</label><input type="range" id="rShe" min="0" max="3000" step="10"><span class="val" id="vShe"></span>
+      <span class="q"><button class="btn" data-f="0" type="button">0</button><button class="btn" data-f=".25" type="button">¼</button><button class="btn" data-f=".5" type="button">½</button></span>
+      <button class="btn go" id="gShe" type="button">fijar</button></div>
+
+    <div class="sub" id="subMan"><div class="rose" id="rose"></div>
+      <div class="sl"><div><label>RUMBO</label><input type="range" id="rCrs" min="1" max="8.9" step=".1" value="3"><span class="val" id="vCrs"></span></div>
+      <div><label>WARP</label><input type="range" id="rWrp" min=".1" max="8" step=".1" value="1"><span class="val" id="vWrp"></span></div></div>
+      <span class="gobtns"><button class="btn go" id="gMov" type="button">navegar</button><button class="btn red" id="gTor" type="button">torpedo</button></span></div>
+  </div>
+
+  </div>
+
+  <div class="colR">
+  <nav class="tabs" id="tabs" aria-label="Pantallas">
+    <button class="tab on" type="button" data-t="mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/></svg><span>Mapa</span></button>
+    <button class="tab" type="button" data-t="gal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="12" r="7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span>Galaxia</span></button>
+    <button class="tab" type="button" data-t="nave"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.4 3.1 7.8 7.5 9.5 4.4-1.700 7.500-5.100 7.500-9.500V6z"/><path d="M8.500 12.200 11 14.500l4.500-5"/></svg><span>Nave</span></button>
+    <button class="tab" type="button" data-t="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.500" width="16" height="17" rx="1.500"/><path d="M8 8.500h8M8 12h8M8 15.500h5"/></svg><span>Registro</span><b class="bdg" id="bdg"></b></button>
+  </nav>
+
+  <section class="view" data-v="gal" aria-label="Galaxia">
+    <div class="galbox">
+      <div class="gal" id="gal"></div>
+      <p class="legend"><span class="K">K</span> klingon · <span class="B">B</span> base · estrellas — tocá un cuadrante para viajar</p>
+    </div>
+  </section>
+
+  <section class="view scroll" data-v="nave" aria-label="Nave">
+    <div class="pn"><h3>Nave</h3><div class="gauges" id="gauges"></div></div>
+    <div class="pn"><h3>Control de daños</h3><div class="dmg" id="dmg"></div></div>
+  </section>
+
+  <section class="view" data-v="log" aria-label="Registro">
+    <div class="log" id="log" aria-live="polite"></div>
+  </section>
+
+  <button class="ticker" id="ticker" type="button" aria-label="Último mensaje: abrir registro"></button>
+
+  </div>
+
+  <div class="ov show" id="ov"></div>
+</div>
+
+<div class="glass"></div>
+
+<dialog id="menu"><div class="dlgin">
+  <h2>MENÚ</h2>
+  <div class="menu">
+    <button class="btn" id="bHelp" type="button">Cómo se juega</button>
+    <button class="btn" id="bSnd" type="button">Sonido: sí</button>
+    <button class="btn" id="bVib" type="button">Vibración: sí</button>
+    <button class="btn" id="bCrt" type="button">Pantalla antigua: suave</button>
+    <button class="btn" id="bFull" type="button" hidden>Pantalla completa</button>
+    <button class="btn go" id="bInst" type="button" hidden>Instalar como app</button>
+    <button class="btn" id="bNew" type="button">Nueva misión</button>
+    <button class="btn red" id="bQuit" type="button">Renunciar al mando</button>
+  </div>
+  <p class="right"><button class="mini" id="menuX" type="button">cerrar</button></p>
+</div></dialog>
+
+<dialog id="dlg"><div class="dlgin">
+  <h2>CÓMO SE JUEGA</h2>
+  <div id="dlgB"></div>
+  <p class="right"><button class="mini" id="dlgX" type="button">cerrar</button></p>
+</div></dialog>
+
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
